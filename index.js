@@ -50,7 +50,7 @@ async function run() {
       let query = {};
 
       if (minPrice && maxPrice) {
-        query = { price: { $gte: parseInt(minPrice), $lte: parseInt(maxPrice) } };
+        query = {price_per_night: { $gte: parseInt(minPrice), $lte: parseInt(maxPrice) } };
       }
 
       const cursor = roomCollection.find(query);
