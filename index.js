@@ -37,7 +37,41 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+
+
+    // creating new collection and collection name 
+
+    const roomCollection = client.db('roomDB').collection('room');
+
+    //  getting rooms from db
+
+    app.get('/room', async (req, res) => {
+      const { minPrice, maxPrice } = req.query;
+      let query = {};
+
+      if (minPrice && maxPrice) {
+        query = { price: { $gte: parseInt(minPrice), $lte: parseInt(maxPrice) } };
+      }
+
+      const cursor = roomCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+
+    // id query for room details 
+
+    app.get('/room/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await roomCollection.findOne(query);
+      res.send(result);
+    })
+
+
+
+
+    // await client.connect();
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -60,9 +94,9 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send('server is runnig')
-  })
-  
-  app.listen(port, () => {
-    console.log(`server is running in port: ${port}`)
-  })
+  res.send('server is runnig')
+})
+
+app.listen(port, () => {
+  console.log(`server is running in port: ${port}`)
+})
