@@ -73,6 +73,16 @@ async function run() {
     })
 
 
+    // email query for user booking 
+
+    app.get('/my-bookings/:email', async (req, res) => {
+
+      console.log(req.params.email)
+      const result = await bookingCollection.find({ email: req.params.email }).toArray();
+      res.send(result)
+    });
+
+
     // sending booking data to data base 
     app.post('/booking', async (req, res) => {
       const bookigDetails = req.body;
@@ -83,6 +93,7 @@ async function run() {
     })
 
 
+    // delte booking data 
 
 
 
