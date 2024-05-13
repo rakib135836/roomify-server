@@ -39,9 +39,13 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
 
 
-    // creating new collection and collection name 
+    // collection for available rooms 
 
     const roomCollection = client.db('roomDB').collection('room');
+
+    // collection for booking details
+    const bookingCollection = client.db('roomDB').collection('booking');
+
 
     //  getting rooms from db
 
@@ -50,7 +54,7 @@ async function run() {
       let query = {};
 
       if (minPrice && maxPrice) {
-        query = {price_per_night: { $gte: parseInt(minPrice), $lte: parseInt(maxPrice) } };
+        query = { price_per_night: { $gte: parseInt(minPrice), $lte: parseInt(maxPrice) } };
       }
 
       const cursor = roomCollection.find(query);
@@ -67,6 +71,19 @@ async function run() {
       const result = await roomCollection.findOne(query);
       res.send(result);
     })
+
+
+    // sending booking data to data base 
+    app.post('/booking', async (req, res) => {
+      const bookigDetails = req.body;
+      console.log(bookigDetails);
+      
+      const result = await bookingCollection.insertOne(bookigDetails);
+      res.send(result);
+    })
+
+
+
 
 
 
