@@ -64,11 +64,23 @@ async function run() {
 
 
     // getting rooms for featured rooms 
-    app.get('/rooms',async(req,res)=>{
-      const cursor=roomCollection.find();
-      const result=await cursor.toArray();
+    app.get('/rooms', async (req, res) => {
+      const cursor = roomCollection.find();
+      const result = await cursor.toArray();
       res.send(result);
     })
+
+    // Get reviews for a specific room
+    app.get('/review-room/:id', async (req, res) => {
+     
+        const roomId = req.params.id;
+        const query = { id: roomId }; 
+        const result = await bookingCollection.find(query).toArray();
+        res.send(result);
+     
+    });
+
+
 
     // id query for room details 
 
@@ -103,7 +115,7 @@ async function run() {
     app.post('/booking', async (req, res) => {
       const bookigDetails = req.body;
       console.log(bookigDetails);
-      
+
       const result = await bookingCollection.insertOne(bookigDetails);
       res.send(result);
     })
@@ -114,21 +126,21 @@ async function run() {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const update = {
-          $set: {
-              date: req.body.date,
-              review: req.body.review
-          }
+        $set: {
+          date: req.body.date,
+          review: req.body.review
+        }
       };
-  
+
       try {
-          const result = await bookingCollection.updateOne(filter, update);
-          res.send(result);
+        const result = await bookingCollection.updateOne(filter, update);
+        res.send(result);
       } catch (err) {
-          console.error(err);
-          res.status(500).send("Error updating booking.");
+        console.error(err);
+        res.status(500).send("Error updating booking.");
       }
-  });
-  
+    });
+
 
     // delte booking data 
 
