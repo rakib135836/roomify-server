@@ -63,6 +63,13 @@ async function run() {
     });
 
 
+    // getting rooms for featured rooms 
+    app.get('/rooms',async(req,res)=>{
+      const cursor=roomCollection.find();
+      const result=await cursor.toArray();
+      res.send(result);
+    })
+
     // id query for room details 
 
     app.get('/room/:id', async (req, res) => {
@@ -72,7 +79,7 @@ async function run() {
       res.send(result);
     })
 
-    
+
     // getting bookings for update 
     app.get('/getting-bookings/:id', async (req, res) => {
       const id = req.params.id;
