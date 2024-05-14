@@ -72,6 +72,14 @@ async function run() {
       res.send(result);
     })
 
+    // getting bookings for update 
+    app.get('/getting-bookings/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await bookingCollection.findOne(query);
+      res.send(result);
+    })
+
 
     // email query for user booking 
 
@@ -92,6 +100,27 @@ async function run() {
       res.send(result);
     })
 
+    // update
+
+    app.put('/bookings/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const update = {
+          $set: {
+              date: req.body.date,
+              review: req.body.review
+          }
+      };
+  
+      try {
+          const result = await bookingCollection.updateOne(filter, update);
+          res.send(result);
+      } catch (err) {
+          console.error(err);
+          res.status(500).send("Error updating booking.");
+      }
+  });
+  
 
     // delte booking data 
 
