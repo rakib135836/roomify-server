@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const cookieParser=require('cookie-parser');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 
@@ -9,8 +11,19 @@ const port = process.env.PORT || 5000;
 
 
 // middle wire
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://roomify-1529f.web.app",
+      "https://roomify-1529f.firebaseapp.com",
+    ],
+    credentials: true,
+  })
+);
+  
 app.use(express.json());
+app.use(cookieParser());
 
 
 
@@ -72,12 +85,12 @@ async function run() {
 
     // Get reviews for a specific room
     app.get('/review-room/:id', async (req, res) => {
-     
-        const roomId = req.params.id;
-        const query = { id: roomId }; 
-        const result = await bookingCollection.find(query).toArray();
-        res.send(result);
-     
+
+      const roomId = req.params.id;
+      const query = { id: roomId };
+      const result = await bookingCollection.find(query).toArray();
+      res.send(result);
+
     });
 
 
@@ -106,7 +119,12 @@ async function run() {
     app.get('/my-bookings/:email', async (req, res) => {
 
       console.log(req.params.email)
-      const result = await bookingCollection.find({ email: req.params.email }).toArray();
+      console.log('tok tok token ', req.cookies)
+      let query={};
+      if(req.query?.email){
+        query={email:req.query.email}
+      }
+      const result = await bookingCollection.find(query).toArray();
       res.send(result)
     });
 
@@ -119,6 +137,23 @@ async function run() {
       const result = await bookingCollection.insertOne(bookigDetails);
       res.send(result);
     })
+
+
+    // jwt related api 
+    app.post('/jwt', async (req, res) => {
+      const user = req.body;
+      console.log(user);
+      const token=jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'})
+
+
+      res.cookie('token',token,{
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production', 
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', 
+      })
+      .send({success:true})
+    })
+
 
     // update
 
@@ -157,7 +192,8 @@ async function run() {
 
     // await client.connect();
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
+
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
