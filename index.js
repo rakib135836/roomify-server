@@ -83,6 +83,13 @@ async function run() {
       res.send(result);
     })
 
+    // getting bookings for home page  
+    app.get('/bookings', async (req, res) => {
+      const cursor = bookingCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    })
+
     // Get reviews for a specific room
     app.get('/review-room/:id', async (req, res) => {
 
