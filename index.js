@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
-const cookieParser=require('cookie-parser');
+const cookieParser = require('cookie-parser');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 
@@ -15,13 +15,14 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
+      "http://localhost:5174",
       "https://roomify-1529f.web.app",
       "https://roomify-1529f.firebaseapp.com",
     ],
     credentials: true,
   })
 );
-  
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -58,6 +59,11 @@ async function run() {
 
     // collection for booking details
     const bookingCollection = client.db('roomDB').collection('booking');
+    const adminCollection = client.db('roomDB').collection('admin');
+
+
+
+
 
 
     //  getting rooms from db
@@ -127,9 +133,9 @@ async function run() {
 
       console.log(req.params.email)
       console.log('tok tok token ', req.cookies)
-      let query={};
-      if(req.query?.email){
-        query={email:req.query.email}
+      let query = {};
+      if (req.query?.email) {
+        query = { email: req.query.email }
       }
       const result = await bookingCollection.find(query).toArray();
       res.send(result)
@@ -150,15 +156,15 @@ async function run() {
     app.post('/jwt', async (req, res) => {
       const user = req.body;
       console.log(user);
-      const token=jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'})
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
 
 
-      res.cookie('token',token,{
+      res.cookie('token', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', 
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', 
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
       })
-      .send({success:true})
+        .send({ success: true })
     })
 
 
@@ -192,6 +198,24 @@ async function run() {
       const result = await bookingCollection.deleteOne(query);
       res.send(result);
     })
+
+    
+    // admins 
+
+    app.get('/admins/:email', async (req, res) => {
+      const email = req.params.email;
+
+      const query = { email: email };
+      const user = await adminCollection.findOne(query);
+
+      if (user && user.identity === 'admin') {
+        // Send back user data if they are an admin
+        res.send({ ...user, message: 'the user is an admin' });
+      } else {
+        // Send 404 if user is not an admin
+        res.status(404).send({ message: 'admin not found or user is not an admin' });
+      }
+    });
 
 
 
